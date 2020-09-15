@@ -38,6 +38,8 @@ class GroceryListTableViewController: UITableViewController {
   var items: [GroceryItem] = []
   var user: User!
   var userCountBarButtonItem: UIBarButtonItem!
+    // tldr: this property allows for saving and syncing of data to the given location
+    let ref = Database.database().reference(withPath: "grocery-items")
   
   
   override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -114,32 +116,42 @@ class GroceryListTableViewController: UITableViewController {
   
   // MARK: Add Item
   
-  @IBAction func addButtonDidTouch(_ sender: AnyObject) {
-    let alert = UIAlertController(title: "Grocery Item",
+    @IBAction func addButtonDidTouch(_ sender: AnyObject) {
+        
+        let alert = UIAlertController(title: "Grocery Item",
                                   message: "Add an Item",
                                   preferredStyle: .alert)
-    
-    let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-      let textField = alert.textFields![0]
-      
-      let groceryItem = GroceryItem(name: textField.text!,
-                                    addedByUser: self.user.email,
-                                    completed: false)
-      
-      self.items.append(groceryItem)
-      self.tableView.reloadData()
-    }
-    
-    let cancelAction = UIAlertAction(title: "Cancel",
+
+        let saveAction = UIAlertAction(title: "Save", style: .default) { [weak self] _ in
+            guard let self = self, let textField = alert.textFields?.first, let text = textField.text else { return }
+            
+            // create a new uncompleted GroceryItem using the current user's data
+            let groceryItem = GroceryItem(name: text, addedByUser: self.user.email, completed: false)
+            /*
+             create a child ref - the key value (url) of this ref is the item's
+             name in lowercase, so when users add duplicate items (even uppercased
+             or mixed case), the db only saves the latest entry
+            */
+            let groceryItemRef = self.ref.child(text.lowercased())
+            
+            // save data to database. The setValue(_:) method expects a dictionary
+            // the GroceryItem struct has a helper method to turn it into a dictionary
+            groceryItemRef.setValue(groceryItem.toAnyObject())
+
+            self.items.append(groceryItem)
+            self.tableView.reloadData()
+        }
+
+        let cancelAction = UIAlertAction(title: "Cancel",
                                      style: .cancel)
-    
-    alert.addTextField()
-    
-    alert.addAction(saveAction)
-    alert.addAction(cancelAction)
-    
-    present(alert, animated: true, completion: nil)
-  }
+
+        alert.addTextField()
+
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true, completion: nil)
+    }
   
   @objc func userCountButtonDidTouch() {
     performSegue(withIdentifier: listToUsers, sender: nil)
