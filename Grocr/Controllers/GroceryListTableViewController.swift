@@ -61,6 +61,8 @@ class GroceryListTableViewController: UITableViewController {
     navigationItem.leftBarButtonItem = userCountBarButtonItem
     
     user = User(uid: "FakeId", email: "hungry@person.food")
+    
+    addReferenceObserver()
   }
   
   // MARK: UITableView Delegate methods
@@ -156,4 +158,33 @@ class GroceryListTableViewController: UITableViewController {
   @objc func userCountButtonDidTouch() {
     performSegue(withIdentifier: listToUsers, sender: nil)
   }
+    
+    // MARK: Firebase methods
+    
+    // retrieving data
+    private func addReferenceObserver() {
+        
+        // attach a listener to receive updates whenever the 'grocery-items'
+        // endpoint is modified
+        ref.observe(.value) { [weak self] (snapshot) in
+            
+            guard let self = self else { return }
+            
+            var newItems: [GroceryItem] = []
+            
+            // iterate through the data from the snapshot of the latest set of data
+            // this contains the entire list of grocery items, not just updates
+            for child in snapshot.children {
+                
+                // cast the child as a data snapshot and initialize the grocery item
+                // with the snapshot (custom initializer method)
+                if let snapshot = child as? DataSnapshot, let groceryItem = GroceryItem(snapshot: snapshot) {
+                    newItems.append(groceryItem)
+                }
+            }
+            
+            self.items = newItems
+            self.tableView.reloadData()
+        }
+    }
 }
