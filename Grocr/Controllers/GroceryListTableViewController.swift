@@ -105,27 +105,42 @@ class GroceryListTableViewController: UITableViewController {
         
     }
   
-  override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    guard let cell = tableView.cellForRow(at: indexPath) else { return }
-    var groceryItem = items[indexPath.row]
-    let toggledCompletion = !groceryItem.completed
-    
-    toggleCellCheckbox(cell, isCompleted: toggledCompletion)
-    groceryItem.completed = toggledCompletion
-    tableView.reloadData()
-  }
-  
-  func toggleCellCheckbox(_ cell: UITableViewCell, isCompleted: Bool) {
-    if !isCompleted {
-      cell.accessoryType = .none
-      cell.textLabel?.textColor = .black
-      cell.detailTextLabel?.textColor = .black
-    } else {
-      cell.accessoryType = .checkmark
-      cell.textLabel?.textColor = .gray
-      cell.detailTextLabel?.textColor = .gray
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        // find the cell the user tapped via cellForRow(at:)
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        
+        // get the corresponding groceryitem by using the index path row
+        let groceryItem = items[indexPath.row]
+        
+        // grab the inverse of the grocery item's current 'completed' property
+        let toggledCompletion = !groceryItem.completed
+        
+        // call toggleCellCheckbox to update the visual properties of the cell
+        toggleCellCheckbox(cell, isCompleted: toggledCompletion)
+        
+        // use updateChildValues(_:), passing in a dictionary, to update firebase
+        // this differs from setValue(_:) as this method applies updates, whereas
+        // setValue replaces the entire value there
+        groceryItem.ref?.updateChildValues([
+            // pass in a dictionary with the updated completion value for the
+            // 'completed' key
+            "completed": toggledCompletion
+        ])
+        
     }
-  }
+  
+    func toggleCellCheckbox(_ cell: UITableViewCell, isCompleted: Bool) {
+        if !isCompleted {
+            cell.accessoryType = .none
+            cell.textLabel?.textColor = .black
+            cell.detailTextLabel?.textColor = .black
+        } else {
+            cell.accessoryType = .checkmark
+            cell.textLabel?.textColor = .gray
+            cell.detailTextLabel?.textColor = .gray
+        }
+    }
   
   // MARK: Add Item
   
