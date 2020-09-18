@@ -192,7 +192,11 @@ class GroceryListTableViewController: UITableViewController {
         
         // attach a listener to receive updates whenever the 'grocery-items'
         // endpoint is modified
-        ref.observe(.value) { [weak self] (snapshot) in
+        
+        // sorting: we can specify a query to sort/order the results from
+        // our database by using the queryOrdered(byChild:) method along with
+        // a specified key
+        ref.queryOrdered(byChild: "completed").observe(.value) { [weak self] (snapshot) in
             
             guard let self = self else { return }
             
