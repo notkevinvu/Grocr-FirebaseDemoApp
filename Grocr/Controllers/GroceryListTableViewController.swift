@@ -187,7 +187,7 @@ class GroceryListTableViewController: UITableViewController {
     
     // MARK: Firebase methods
     
-    // retrieving data
+    // observing data changes and retrieving updated data
     private func addReferenceObserver() {
         
         // attach a listener to receive updates whenever the 'grocery-items'
