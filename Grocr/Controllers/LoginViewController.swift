@@ -56,9 +56,13 @@ class LoginViewController: UIViewController {
             // value being populated with the user's info)
             if user != nil {
                 
-                // on successful authentication, perform segue and clear text fields
-                // we don't need to pass the user to the next controller here
+                // on successful authentication, perform segue and clear text fields.
+                // additionally, if the user is already logged in, we bypass
+                // this VC to go to the list VC
                 self.performSegue(withIdentifier: self.loginToList, sender: nil)
+                
+                // we will get user information via the authentication observer
+                // in the grocery list VC anyway, so we don't need to pass data there
                 self.textFieldLoginEmail.text = nil
                 self.textFieldLoginPassword.text = nil
             }
