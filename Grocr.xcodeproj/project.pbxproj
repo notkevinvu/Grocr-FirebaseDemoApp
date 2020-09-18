@@ -21,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		250FF97C251542FB0022E3A7 /* Grocr.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Grocr.entitlements; sourceTree = "<group>"; };
 		258C2C412510475900B5D94B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		645D7894204344160093B00C /* Grocr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Grocr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		645D7897204344160093B00C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -88,6 +89,7 @@
 		645D7896204344160093B00C /* Grocr */ = {
 			isa = PBXGroup;
 			children = (
+				250FF97C251542FB0022E3A7 /* Grocr.entitlements */,
 				649F421B20438CBC00B21997 /* Models */,
 				649F421C20438CC100B21997 /* Controllers */,
 				645D7897204344160093B00C /* AppDelegate.swift */,
@@ -390,11 +392,12 @@
 			baseConfigurationReference = 7E91D6516268E18FC88947A4 /* Pods-Grocr.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Grocr/Grocr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = SR9JU2F547;
 				INFOPLIST_FILE = Grocr/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = rw.firebase.gettingstarted;
+				PRODUCT_BUNDLE_IDENTIFIER = rw.firebase.gettingstarted.kvdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -406,11 +409,12 @@
 			baseConfigurationReference = 90E01CD9D5C237C44E4FC22B /* Pods-Grocr.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Grocr/Grocr.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = SR9JU2F547;
 				INFOPLIST_FILE = Grocr/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = rw.firebase.gettingstarted;
+				PRODUCT_BUNDLE_IDENTIFIER = rw.firebase.gettingstarted.kvdemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = 1;
