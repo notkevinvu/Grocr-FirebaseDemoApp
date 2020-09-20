@@ -31,38 +31,63 @@ import Firebase
 
 class OnlineUsersTableViewController: UITableViewController {
   
-  // MARK: Constants
-  let userCell = "UserCell"
+    // MARK: Constants
+    let userCell = "UserCell"
+
+    // MARK: Properties
+    var currentUsers: [String] = []
   
-  // MARK: Properties
-  var currentUsers: [String] = []
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
   
-  override var preferredStatusBarStyle: UIStatusBarStyle {
-    return .lightContent
-  }
-  
-  // MARK: UIViewController Lifecycle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    currentUsers.append("hungry@person.food")
-  }
-  
-  // MARK: UITableView Delegate methods
-  
-  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return currentUsers.count
-  }
-  
-  override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: userCell, for: indexPath)
-    let onlineUserEmail = currentUsers[indexPath.row]
-    cell.textLabel?.text = onlineUserEmail
-    return cell
-  }
-  
-  // MARK: Actions
-  
-  @IBAction func signoutButtonPressed(_ sender: AnyObject) {
-    dismiss(animated: true, completion: nil)
-  }
+    // MARK: UIViewController Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        currentUsers.append("hungry@person.food")
+    }
+    
+    // MARK: UITableView Delegate methods
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return currentUsers.count
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: userCell, for: indexPath)
+        let onlineUserEmail = currentUsers[indexPath.row]
+        cell.textLabel?.text = onlineUserEmail
+        return cell
+    }
+    
+    // MARK: Actions
+    
+    @IBAction func signoutButtonPressed(_ sender: AnyObject) {
+        
+        // get current user and create a reference based on its online user uid
+        let user = Auth.auth().currentUser!
+        let onlineRef = Database.database().reference(withPath: "online/\(user.uid)")
+        
+        // call removeValue on that reference to remove the user from the online path
+        // - firebase adds the user to 'online' upon sign in but does not remove
+        // on sign out
+        onlineRef.removeValue { (error, dbref) in
+            
+            // error handling
+            if let error = error {
+                print("Removing online failed: \(error).")
+                return
+            }
+            
+            // call the signOut() method, which removes the current user's
+            // credentials form the keychain
+            do {
+                try Auth.auth().signOut()
+                self.dismiss(animated: true, completion: nil)
+            } catch let error {
+                print("Auth sign out failed: \(error)")
+            }
+        }
+        
+    }
 }
