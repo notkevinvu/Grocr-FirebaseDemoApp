@@ -31,50 +31,63 @@ import Firebase
 
 class GroceryListTableViewController: UITableViewController {
 
-  // MARK: Constants
-  let listToUsers = "ListToUsers"
-  
-  // MARK: Properties
-  var items: [GroceryItem] = []
-  var user: User!
-  var userCountBarButtonItem: UIBarButtonItem!
+    // MARK: Constants
+    let listToUsers = "ListToUsers"
+
+    // MARK: Properties
+    var items: [GroceryItem] = []
+    var user: User!
+    var userCountBarButtonItem: UIBarButtonItem!
+    
     // tldr: this property allows for saving and syncing of data to the given location
     let ref = Database.database().reference(withPath: "grocery-items")
+    // reference that stores a list of online users
+    let usersRef = Database.database().reference(withPath: "online")
   
   
-  override var preferredStatusBarStyle: UIStatusBarStyle {
-    return .lightContent
-  }
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
   
-  // MARK: UIViewController Lifecycle
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    tableView.allowsMultipleSelectionDuringEditing = false
-    
-    userCountBarButtonItem = UIBarButtonItem(title: "1",
-                                             style: .plain,
-                                             target: self,
-                                             action: #selector(userCountButtonDidTouch))
-    userCountBarButtonItem.tintColor = UIColor.white
-    navigationItem.leftBarButtonItem = userCountBarButtonItem
-    
-    user = User(uid: "FakeId", email: "hungry@person.food")
-    
-    // observe changes in the database (retrieve/update/delete data)
-    addReferenceObserver()
-    
-    // attach an authentication observer to the Firebase auth object, which in
-    // turn assigns the user property when a user successfully signs in
-    Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
-        guard let self = self,
+    // MARK: UIViewController Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        tableView.allowsMultipleSelectionDuringEditing = false
+        
+        userCountBarButtonItem = UIBarButtonItem(title: "1",
+                                         style: .plain,
+                                         target: self,
+                                         action: #selector(userCountButtonDidTouch))
+        userCountBarButtonItem.tintColor = UIColor.white
+        navigationItem.leftBarButtonItem = userCountBarButtonItem
+
+        user = User(uid: "FakeId", email: "hungry@person.food")
+
+        // observe changes in the database (retrieve/update/delete data)
+        addReferenceObservers()
+
+        // attach an authentication observer to the Firebase auth object, which in
+        // turn assigns the user property when a user successfully signs in
+        Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
+            guard let self = self,
             let user = user
             else { return }
-        
-        self.user = User(authData: user)
+
+            self.user = User(authData: user)
+            
+            // get the reference for the current user via the uid path
+            let currentUserRef = self.usersRef.child(self.user.uid)
+            
+            // use the reference to save the current user's email
+            currentUserRef.setValue(self.user.email)
+            
+            // remove the current user ref after connection to firebase closes
+            // (i.e. if a user quits the app) - helps monitor online/offline users
+            currentUserRef.onDisconnectRemoveValue()
+        }
     }
-  }
   
   // MARK: UITableView Delegate methods
   
@@ -94,11 +107,11 @@ class GroceryListTableViewController: UITableViewController {
 
         return cell
     }
-  
+    
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
-  
+    
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
 
         if editingStyle == .delete {
@@ -199,7 +212,7 @@ class GroceryListTableViewController: UITableViewController {
     // MARK: Firebase methods
     
     // observing data changes and retrieving updated data
-    private func addReferenceObserver() {
+    private func addReferenceObservers() {
         
         // attach a listener to receive updates whenever the 'grocery-items'
         // endpoint is modified
@@ -226,6 +239,18 @@ class GroceryListTableViewController: UITableViewController {
             
             self.items = newItems
             self.tableView.reloadData()
+        }
+        
+        
+        // Users ref observer
+        usersRef.observe(.value) { [weak self] (snapshot) in
+            guard let self = self else { return }
+            
+            if snapshot.exists() {
+                self.userCountBarButtonItem.title = snapshot.childrenCount.description
+            } else {
+                self.userCountBarButtonItem.title = "0"
+            }
         }
     }
 }

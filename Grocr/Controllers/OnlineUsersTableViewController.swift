@@ -36,6 +36,7 @@ class OnlineUsersTableViewController: UITableViewController {
 
     // MARK: Properties
     var currentUsers: [String] = []
+    let usersRef = Database.database().reference(withPath: "online")
   
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -44,7 +45,44 @@ class OnlineUsersTableViewController: UITableViewController {
     // MARK: UIViewController Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        currentUsers.append("hungry@person.food")
+        
+        observeCurrentUsersReference()
+    }
+    
+    // MARK: Helper methods
+    
+    private func observeCurrentUsersReference() {
+        // update table view with the added child/value
+        usersRef.observe(.childAdded) { [weak self] (snap) in
+            guard let self = self else { return }
+            
+            guard let email = snap.value as? String else { return }
+            self.currentUsers.append(email)
+            
+            // inserting row at the correct index in the table view
+            let row = self.currentUsers.count - 1
+            let indexPath = IndexPath(row: row, section: 0)
+            // only renders items as they are added with an animation rather than
+            // reloading the entire list
+            self.tableView.insertRows(at: [indexPath], with: .top)
+        }
+        
+        usersRef.observe(.childRemoved) { [weak self] (snap) in
+            guard
+                let self = self,
+                let emailToFind = snap.value as? String
+                else {
+                    return
+            }
+            
+            for (index, email) in self.currentUsers.enumerated() {
+                if email == emailToFind {
+                    let indexPath = IndexPath(row: index, section: 0)
+                    self.currentUsers.remove(at: index)
+                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                }
+            }
+        }
     }
     
     // MARK: UITableView Delegate methods
