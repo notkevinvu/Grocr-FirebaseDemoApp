@@ -38,6 +38,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         FirebaseApp.configure()
         
+        // enables offline persistence such that offline updates will apply
+        // to the firebase database once a connection is made
+        Database.database().isPersistenceEnabled = true
+        
         return true
     }
     
